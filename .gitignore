@@ -8,6 +8,8 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # Dependiences
+.vscode
+thunder-tests
 client/node_modules
 server/node_modules
 server/config.js

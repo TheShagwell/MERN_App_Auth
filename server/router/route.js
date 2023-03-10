@@ -3,7 +3,7 @@ const router = Router();
 
 /* **** import all controllers ****  */
 import * as Controller from "../controllers/appcontroller.js";
-
+import Auth, { localVaribles } from "../middleware/auth.js";
 
 // POST Methods
 router.route('/register').post(Controller.register); //register the user
@@ -13,12 +13,12 @@ router.route('/login').post(Controller.verifyUser,Controller.login); // login th
 
 // GET Methods
 router.route('/user/:username').get(Controller.getUser);
-router.route('/generateOTP').get(Controller.generateOTP);
+router.route('/generateOTP').get(Controller.verifyUser, localVaribles, Controller.generateOTP);
 router.route('/verifyOTP').get(Controller.verifyOTP);
 router.route('/createResetSession').get(Controller.createResetSession);
 
 // PUT Methods
-router.route('/updateUser').put(Controller.updateUser);
-router.route('/reserPassword').put(Controller.resetPassword);
+router.route('/updateuser').put(Auth, Controller.updateUser);
+router.route('/resetPassword').put(Controller.resetPassword);
 
 export default router;
