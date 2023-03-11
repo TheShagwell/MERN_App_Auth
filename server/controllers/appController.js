@@ -223,7 +223,13 @@ export async function verifyOTP(req, res){
     Successully redirect user when OTP is valid
 */
 export async function createResetSession(req, res){
-    res.json('createResetSession route')
+    // res.json('createResetSession route')
+    if(req.app.locals.resetSession){
+        req.app.locals.resetSession = false; // resetting the session for reset password i.e allow access to this route once
+        return res.status(201).send({ msg: "Access Granted...!" })
+    }
+
+    return res.status(440).send({ error : "Session Expired" })
 }
 
 
@@ -231,5 +237,40 @@ export async function createResetSession(req, res){
     Update the password when we have a valid session
 */
 export async function resetPassword(req, res){
-    res.json('resetPassword route')
+    // res.json('resetPassword route')
+    try {
+
+        // yo must be a valid user before you reset the password otherwise it will throw an error as seen below
+        if(!req.app.locals.resetSession) return res.status(440).send({ error: "Session Expired...!" })
+
+        const { username, password } = req.body; // username and password come from the body of the request
+        
+        try {
+            UserModel.findOne({ username })
+                .then(user => {
+                    bcrypt.hash(password, 10) // Hashing the password 
+                        .then(hashedPassword => { // saving the hashed password 
+                            UserModel.updateOne( // updating the user model
+                                { username: user.username }, // query
+                                { password: hashedPassword }, // update password hashed
+                                function(err, data){ // callback
+                                    if(err) throw err; // if there is an error
+                                    req.app.locals.resetSession = false; // resetting the session for reset password
+                                    return res.status(201).send({ msg: "Record Updated...!"}) // return success message
+                                }
+                            )
+                        })
+                        .catch( e => { // if there is an error
+                            return res.status(500).send({ error: "Enabled to hashed password"}) // if there is an error
+                        })
+                })
+                .catch(error => {
+                    return res.status(404).send({ error: "Username not Found" }); // if there is an error from mongoose
+                })
+        } catch (error) {
+            return res.status(500).send({ error }) // if there is an error (server error)
+        }
+    } catch (error) {
+        return res.status(401).send({ error }) // if there is an error
+    }
 }

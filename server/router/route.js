@@ -3,11 +3,12 @@ const router = Router();
 
 /* **** import all controllers ****  */
 import * as Controller from "../controllers/appcontroller.js";
+import { registerMail } from '../controllers/mailer.js' 
 import Auth, { localVaribles } from "../middleware/auth.js";
 
 // POST Methods
 router.route('/register').post(Controller.register); //register the user
-// router.route('/registerMail').post(); // send the email
+router.route('/registerMail').post(registerMail); // send the email
 router.route('/authenticate').post((req, res) => res.end()); // authenticate the user
 router.route('/login').post(Controller.verifyUser,Controller.login); // login the user
 
@@ -19,6 +20,6 @@ router.route('/createResetSession').get(Controller.createResetSession);
 
 // PUT Methods
 router.route('/updateuser').put(Auth, Controller.updateUser);
-router.route('/resetPassword').put(Controller.resetPassword);
+router.route('/resetPassword').put(Controller.verifyUser, Controller.resetPassword);
 
 export default router;
