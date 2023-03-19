@@ -1,31 +1,43 @@
 import React, { useState} from 'react'
 import { Helmet } from 'react-helmet-async'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import avatar from '../assets/profile.png'
-import { Toaster } from 'react-hot-toast'
+import toast, { Toaster } from 'react-hot-toast'
 import { useFormik } from 'formik'
 import { registerVerification } from '../helper/validate'
 import covertToBase64 from '../helper/convert'
+import { registerUser } from '../helper/helper'
 
 import styles from '../styles/Username.module.css'
 
 
 const Register = () => {
-  const [file, setFile] = useState()
 
+  const navigate = useNavigate()
+  const [file, setFile] = useState()
 
   const formik = useFormik({
     initialValues : {
-      username: '',
-      email: '',
-      password: ''
+      email: 'soso@gmail.com',
+      username: 'soso32',
+      password: 'soso.soso1993.'
     },
     validate: registerVerification,
     validateOnBlur: false,
     validateOnChange: false,
     onSubmit: async values => {
       values = await Object.assign(values, { profile : file || ''})
-      console.log(values);
+      // console.log(values);
+      let registerPromise = registerUser(values);
+      toast.promise(registerPromise, {
+        loading: 'Creating...',
+        success: <b>Registration successful</b>,
+        error: <b>Registration failed</b>,
+      })
+
+      registerPromise.then(() => {
+        navigate('/')
+      })
     }
   })
 
@@ -71,7 +83,7 @@ const Register = () => {
                   <input {...formik.getFieldProps('email')} className={styles.textbox} type="text" placeholder='Email' />
                   <input {...formik.getFieldProps('username')} className={styles.textbox} type="text" placeholder='Username' />
                   <input {...formik.getFieldProps('password')} className={styles.textbox} type="text" placeholder='Password' />
-                  <button className={styles.btn_blue} type='submit'>Sign In</button>
+                  <button className={styles.btn_blue} type='submit'>Register</button>
               </div>
 
               <div className="text-center py-4">

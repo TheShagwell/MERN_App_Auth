@@ -1,4 +1,6 @@
-import ENV from '../config.js'
+import * as dotenv from 'dotenv';
+dotenv.config();
+// import ENV from '../config.js'
 import jwt from 'jsonwebtoken'
 
 // auth middleware
@@ -8,7 +10,7 @@ export default async function Auth(req, res, next) {
         const token = req.headers.authorization.split(" ")[1];
 
         // Retrieve the user details or the logged in user
-        const decodedToken = await jwt.verify(token, ENV.JWT_SECRET)
+        const decodedToken = await jwt.verify(token, process.env.JWT_SECRET)
         
         req.user = decodedToken;
         next()

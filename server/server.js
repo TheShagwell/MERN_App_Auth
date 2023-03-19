@@ -1,3 +1,5 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
 import express from 'express'; // Http server connection
 import cors from 'cors'; // Practically, save against malicious attack
 import morgan from 'morgan'
@@ -13,7 +15,7 @@ app.use(cors());
 app.use(morgan('tiny'));
 app.disable('x-powered-by'); // In order not to let haackers know about the app
 
-const port = 8080;
+const port = process.env.API_PORT;
 
 // HTTP GET Request
 app.get('/', (req, res) => {
