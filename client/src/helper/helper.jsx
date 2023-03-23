@@ -1,9 +1,20 @@
 import axios from 'axios'
+import jwt_decode from 'jwt-decode'
 
 /*/ ************CONNECT TO THE BACKEND SERVER************ */
 axios.defaults.baseURL = import.meta.env.VITE_SERVER_DOMAIN
 
 // Making an API reust with axios
+
+/* To get the username of who just logged in to update his/her details so as not refresh
+   after updating all over and over again, we can further decode the user token */
+
+export async function getUsername(){
+    const token = localStorage.getItem('token')
+    if(!token) return Promise.reject('Could not find token');
+    let decode = jwt_decode(token)
+    return decode;
+}
 
 export async function authenticate(username){
     try {
@@ -54,10 +65,10 @@ export async function verifyUserAccount({ username, password }) {
 }
 
 // To update the user profile 
-export async function updateUserProfile({ response }) {
+export async function updateUserProfile( response ) {
     try {
-        const token = localStorage.getItem('token');
-        const data = await axios.put(`/api/updateuser`, response, { headers : {"Authorization" : `Bearer ${token}`} });
+        const token = await localStorage.getItem('token');
+        const data = await axios.put('/api/updateuser', response, { headers : {"Authorization" : `Bearer ${token}`} });
         
         return Promise.resolve({ data });
     } catch (error) {

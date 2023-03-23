@@ -1,17 +1,20 @@
 import React from 'react'
 import { Helmet } from 'react-helmet-async'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import avatar from '../assets/profile.png'
-import { Toaster } from 'react-hot-toast'
+import toast, { Toaster } from 'react-hot-toast'
 import { useFormik } from 'formik'
 import { passwordVerification } from '../helper/validate'
 import useFetch from '../hooks/fetch.hook'
 import { useAuthStore } from '../store/store'
+import { verifyUserAccount } from '../helper/helper'
 
 import styles from '../styles/Username.module.css'
 
 
 const Password = () => {
+  const navigate = useNavigate();
+
   const { username } = useAuthStore(state => state.auth)
   const [{ isLoading, apiData, serverError }] = useFetch(`/user/${username}`)
   
@@ -23,7 +26,19 @@ const Password = () => {
     validateOnBlur: false,
     validateOnChange: false,
     onSubmit: async values => {
-      console.log(values);
+      // console.log(values);
+      let loginPromise = verifyUserAccount({ username, password: values.password })
+      toast.promise(loginPromise, {
+        loading: 'Checking...',
+        success: <b>Login Successfully...!</b>,
+        error: <b>Password Doesn't Match!</b>
+      });
+
+      loginPromise.then(res => {
+        let { token } = res.data;
+        localStorage.setItem('token', token);
+        navigate('/profile')
+      })
     }
   })
 

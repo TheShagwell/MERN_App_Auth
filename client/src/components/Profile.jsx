@@ -1,10 +1,13 @@
 import React, { useState} from 'react'
 import { Helmet } from 'react-helmet-async'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import avatar from '../assets/profile.png'
-import { Toaster } from 'react-hot-toast'
+import toast, { Toaster } from 'react-hot-toast'
 import { useFormik } from 'formik'
+// import { useAuthStore } from '../store/store'
+import useFetch from '../hooks/fetch.hook'
 import { profileVerification } from '../helper/validate'
+import { updateUserProfile } from '../helper/helper'
 import covertToBase64 from '../helper/convert'
 
 import styles from '../styles/Username.module.css'
@@ -12,23 +15,36 @@ import styles from '../styles/Username.module.css'
 
 
 const Profile = () => {
-  const [file, setFile] = useState()
+
+  const navigate = useNavigate();
+  const [file, setFile] = useState();
+
+  // const { username } = useAuthStore(state => state.auth)
+  const [{ isLoading, apiData, serverError }] = useFetch()
 
 
   const formik = useFormik({
     initialValues : {
-      firstname: '',
-      lastname: '',
-      mobile: '',
-      email: '',
-      address: ''
+      firstName: apiData?.firstName || '',
+      lastName: apiData?.lastName || '',
+      mobile: apiData?.mobile || '',
+      email: apiData?.email || '',
+      address: apiData?.address || ''
     },
+    enableReinitialize: true,
     validate: profileVerification,
     validateOnBlur: false,
     validateOnChange: false,
     onSubmit: async values => {
-      values = await Object.assign(values, { profile : file || ''})
-      console.log(values);
+      values = await Object.assign(values, { profile : file || apiData?.profile || ''})
+      let updatePromise = updateUserProfile(values);
+
+      toast.promise(updatePromise, {
+        loading: 'Updating...',
+        success: <b>Update Successfully...!</b>,
+        error: <b>Failed to Update!</b>
+      })
+      // console.log(values);
     }
   })
 
@@ -38,6 +54,14 @@ const Profile = () => {
     setFile(base64);
   }    
 
+  if(isLoading) return <h1 className='text-2xl font-bold'>Loading...</h1>
+  if(serverError) return <h1 className='text-xl text-red-500'>{serverError.message}</h1>
+
+  // To handle user logout 
+  function userLogout() {
+    localStorage.removeItem('token');
+    navigate('/');
+  }
 
   return (
     <div>
@@ -64,7 +88,8 @@ const Profile = () => {
           <form className='py-1' onSubmit={formik.handleSubmit}>
               <div className='profile flex justify-center py-4'>
                   <label htmlFor="profile">
-                    <img src={file ? file : avatar} className={`${styles.profile_img}`} alt="avatar" />
+                    {/* <img src={file ? file : avatar} className={`${styles.profile_img}`} alt="avatar" /> */}
+                    <img src={apiData?.profile || file || avatar} className={`${styles.profile_img}`} alt="avatar" />
                   </label>
 
                   <input onChange={onUpload} type="file" id="profile" />
@@ -72,8 +97,8 @@ const Profile = () => {
 
               <div className="textbox flex flex-col items-center gap-6">
                 <div className="name flex justify-center gap-5">
-                  <input {...formik.getFieldProps('firstname')} className={styles.textbox} type="text" placeholder='Firstname' />
-                  <input {...formik.getFieldProps('lastname')} className={styles.textbox} type="text" placeholder='Lastname' />
+                  <input {...formik.getFieldProps('firstName')} className={styles.textbox} type="text" placeholder='Firstname' />
+                  <input {...formik.getFieldProps('lastName')} className={styles.textbox} type="text" placeholder='Lastname' />
                 </div>
                 <div className="name flex justify-center gap-5">
                   <input {...formik.getFieldProps('mobile')} className={styles.textbox} type="text" placeholder='Mobile No.' />
@@ -86,7 +111,7 @@ const Profile = () => {
               </div>
 
               <div className="text-center py-4">
-                <span className='text-gray-500'>Come back later? <Link className='text-red-500 underline' to="/">Logout</Link></span>
+                <span className='text-gray-500'>Come back later? <button className='text-red-500 underline' onClick={userLogout} to='/'>Logout</button></span>
               </div>
 
             </form>

@@ -10,6 +10,10 @@ import Reset from './components/Reset';
 import Password from './components/Password';
 import PageNotFound from './components/PageNotFound';
 
+// The Auth middleware to protect each routes to prevent users to access any page without login to the app
+import { AuthorizeUser, ProtectRoute } from './middleware/auth';
+
+
 const helmetContext = {};
 
 // Routers
@@ -25,7 +29,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/profile',
-    element: <Profile/>
+    element: <AuthorizeUser><Profile/></AuthorizeUser>
   },
   {
     path: '/recovery',
@@ -37,7 +41,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/password',
-    element: <Password/>
+    element: <ProtectRoute><Password/></ProtectRoute> 
   },
   {
     path: '*',
