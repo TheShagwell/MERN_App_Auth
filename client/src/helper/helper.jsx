@@ -77,27 +77,27 @@ export async function updateUserProfile( response ) {
 }
 
 // To generate OTP
-export async function generateOTP({ username }) {
+export async function generateOTP(username){
     try {
-        const { data : { code }, status } = await axios.get(`/api/generateOTP`, { params : { username }});
+        const {data : { code }, status } = await axios.get('/api/generateOTP', { params : { username }});
 
-        // Send mail the OTP
+        // send mail with the OTP
         if(status === 201){
-            let { data : { email }} = await axios.getUser({ username });
+            let { data : { email }} = await getUser({ username });
             let text = `Your Password Recovery OTP is ${code}. Verify and recover your password.`;
-            await axios.post('/api/registerMail/', { username, userEmail : email, text, subject : 'Password Recovery OTP' });
-            
-            return Promise.resolve({ code });
+            await axios.post('/api/registerMail', { username, userEmail: email, text, subject : "Password Recovery OTP"})
         }
+        return Promise.resolve(code);
     } catch (error) {
-        return Promise.reject({ error })
+        return Promise.reject({ error });
     }
 }
+
 
 // Verrify OTP 
 export async function verifyOTP({ username, code }) {
     try {
-        const { data, status } = await axios.put(`/api/verifyOTP`, { params : { username, code } });
+        const { data, status } = await axios.get(`/api/verifyOTP`, { params : { username, code } });
         return { data, status };
     } catch (error) {
         return Promise.reject({ error })
@@ -105,10 +105,10 @@ export async function verifyOTP({ username, code }) {
 }
 
 
-// Resst Password
+// Reset Password
 export async function resetPassword({ username, password }) {
     try {
-        const { data, status } = await axios.put(`/api/resetPassword`, { params : { username, password } });
+        const { data, status } = await axios.put(`/api/resetPassword`, { username, password } );
 
         return Promise.resolve({ data, status });
     } catch (error) {
