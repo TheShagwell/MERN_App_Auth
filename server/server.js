@@ -31,7 +31,7 @@ app.use('/api', router);
 connect().then(() => {
     try {
         app.listen(port, () => {
-            console.log(`Shagwell Server started on port http://localhost:${port}`);
+            console.log(`Ezrah started the server on port http://localhost:${port}`);
         })
     } catch (error){
         console.log('Cannot connect to the server');
